@@ -10,11 +10,12 @@ import Product from './pages/Product'
 import Cart from './pages/Cart'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './compound/Navbar'
+import Footer from './compound/Footer'
 const App = () =>{
   return (
-   <div className="font:'Poppins' px-2 lg:px-4">
+   <div className=" px-2 lg:px-20"  style={{ fontFamily: 'Poppins, sans-serif' }}>
     <Navbar />
-
+    <hr  className=' text-gray-300'/>
    <Routes>
     <Route path='/' element={<Home />} />
     <Route path='/login' element={<Login />} />
@@ -27,6 +28,7 @@ const App = () =>{
     <Route path='/placeorder' element={<PlaceOrder />} />
     
    </Routes>
+    <Footer />
    </div>
   )
 }
