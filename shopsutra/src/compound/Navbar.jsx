@@ -16,7 +16,7 @@ const Navbar = () => {
 
 
   useEffect(() => {
-    if (location.pathname === '/') {
+    if (location.pathname === '/' || location.pathname === '/about' || location.pathname === '/contact') {
       setStatus(false);
     } else {
       setStatus(true);
