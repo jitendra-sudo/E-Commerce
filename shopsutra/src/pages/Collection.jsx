@@ -8,7 +8,7 @@ function Collection() {
   return (
     <div className=" flex">
       {/* Sidebar Filter */}
-      <div className="w-64 py-18 hidden md:flex px-6  md:flex-col gap-2">
+      <div className="w-64 py-8 hidden md:flex px-6  md:flex-col gap-2">
         <h1 className="text-2xl font-semibold mb-6">Filter</h1>
 
         {/* Categories */}
