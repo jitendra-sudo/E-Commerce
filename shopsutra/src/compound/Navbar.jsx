@@ -33,7 +33,7 @@ const Navbar = () => {
 
   return (
     <>
-      <div className="text-white py-4  flex justify-between items-center font-poppins relative z-50">
+      <div className="text-white py-4 flex justify-between items-center font-poppins relative z-50">
         {/* Logo */}
         <div className="w-20">
           <img src={logo} alt="Logo" className="h-full" />

@@ -3,8 +3,8 @@ import logo from "../assets/logoshopSutra.png";
 
 function Footer() {
     return (
-        <footer className="bg-white text-black py-10 "  style={{ fontFamily: 'Poppins, sans-serif' }}>
-            <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-10 text-center sm:text-left">
+        <footer className="bg-white text-black py-10"  style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <div className=" mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-10  sm:text-left">
                 {/* Logo and Description */}
                 <div>
                     <img src={logo} alt="ShopSutra Logo" className="mx-auto sm:mx-0 mb-4 w-24 h-auto" />
