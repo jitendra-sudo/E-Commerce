@@ -1,11 +1,19 @@
 import { IoMdHeartEmpty } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 const ProductGrid = ({ data }) => {
+  const navigate = useNavigate();
+
+  const HandlePrevievPage = ({ item }) => {
+    navigate(`/product/:${item._id}`, { state:item})
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 md:px-0 py-4  mx-auto">
       {data?.map((item, index) => (
         <div
           key={index}
+          onClick={() => { HandlePrevievPage({ item }) }}
           className="relative bg-white rounded-lg overflow-hidden shadow-md border-[0.5px] border-gray-300 hover:shadow-xl transition-shadow duration-300 group"
         >
           <button className="absolute top-3 right-3 z-10 bg-white text-gray-700 rounded-full p-1 hover:bg-gray-200 transition-colors duration-300">
@@ -14,7 +22,7 @@ const ProductGrid = ({ data }) => {
 
           <div className="w-full">
             <img
-              src={item?.image}
+              src={item?.image[0]}
               alt={item?.name}
               className="w-full h-full transform group-hover:scale-105 transition-transform duration-300  "
             />
