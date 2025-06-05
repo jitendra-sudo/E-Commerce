@@ -47,24 +47,23 @@ function Product() {
   }
 
   return (
-    <div className='py-8 block lg:flex gap-2'>
+    <div className='py-8 block lg:flex gap-2 '>
       {/* left */}
-      <div className='flex w-1/2'>
-        <div className='flex flex-col justify-between gap-2 max-h-118 overflow-y-auto'>
+      <div className='flex h-full w-[60%]'>
+        <div className='flex flex-col justify-between gap-2'>
           {item?.image?.map((img, index) => (
             <img key={index} src={img} onClick={() => setReviewImg(img)} alt='thumbnail' className='w-auto h-26 object-cover cursor-pointer' />
           ))}
         </div>
 
         <div className='ml-4'>
-          <img src={reviewImg} className='w-full h-auto object-contain' />
+          <img src={reviewImg} className='w-full h-full' />
         </div>
       </div>
 
       {/* right */}
-      <div className=''>
+      <div className='w-full'>
         <h1 className='text-2xl text-black font-bold' >{item?.name}</h1>
-        {/* Product Review  */}
         <div className='py-1'>
           {rating !== null ? (
             <div className="flex items-center">{renderStars(rating)} <span className="ml-2 text-sm text-gray-600">({rating.toFixed(1)} out of 5)</span></div>
@@ -85,7 +84,6 @@ function Product() {
               </button>
             ))}
           </div>
-
         </div>
         <div className='flex gap-2 mt-4 '>
           <button className='bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition'>
