@@ -47,9 +47,9 @@ function Product() {
   }
 
   return (
-    <div className='py-8 block lg:flex gap-2 '>
+    <div className='py-8 block lg:flex gap-4 '>
       {/* left */}
-      <div className='flex h-full w-[60%]'>
+      <div className='flex h-full w-full xl:w-[60%]'>
         <div className='flex flex-col justify-between gap-2'>
           {item?.image?.map((img, index) => (
             <img key={index} src={img} onClick={() => setReviewImg(img)} alt='thumbnail' className='w-auto h-26 object-cover cursor-pointer' />
@@ -63,7 +63,7 @@ function Product() {
 
       {/* right */}
       <div className='w-full'>
-        <h1 className='text-2xl text-black font-bold' >{item?.name}</h1>
+        <h1 className='text-xl  xl:text-2xl text-black font-bold' >{item?.name}</h1>
         <div className='py-1'>
           {rating !== null ? (
             <div className="flex items-center">{renderStars(rating)} <span className="ml-2 text-sm text-gray-600">({rating.toFixed(1)} out of 5)</span></div>
@@ -72,7 +72,7 @@ function Product() {
           )}
         </div>
         <p className='text-3xl font-bold py-5 px-4'>₹ {item?.price}</p>
-        <p className='text-gray-500 '>{item?.description}</p>
+        <p className='text-gray-500 text-[12px] xl:text-md '>{item?.description}</p>
 
         <div>
           <p className='text-lg text-black font-bold py-2'>Select Size</p>
