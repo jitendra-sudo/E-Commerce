@@ -6,7 +6,7 @@ import LetterBox from '../compound/letterBox';
 
 function About() {
   return (
-    <section className="  bg-white text-gray-800">
+    <section className=" px-4 md:px-8 lg:px-16 bg-white text-gray-800">
       {/* Title */}
       <TitleHeader task1="About" task2="Us" />
 
@@ -83,7 +83,7 @@ function About() {
         </div>
       </div>
       <div className="pt-4">
-          <LetterBox />
+        <LetterBox />
       </div>
     </section>
   );
