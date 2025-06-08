@@ -7,19 +7,23 @@ import Avatar from '@mui/material/Avatar';
 import { FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import Searchbar from "./searchbar";
+import { useSelector } from "react-redux";
+
+
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sliderOpen, setSliderOpen] = useState(false);
   const [status, setStatus] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const cartItems = useSelector((state) => state.cart.cartItems);
 
 
   useEffect(() => {
-    if (location.pathname === '/' || location.pathname === '/about' || location.pathname === '/contact') {
-      setStatus(false);
-    } else {
+    if (location.pathname === '/collection') {
       setStatus(true);
+    } else {
+      setStatus(false);
     }
   }, [location.pathname]);
 
@@ -78,7 +82,7 @@ const Navbar = () => {
           >
             <FaShoppingBag className="h-6 w-7" />
             <span className="absolute bg-gray-700 group-hover:bg-gray-900 text-white text-xs rounded-full top-[13px] -right-1 px-1">
-              0
+              {cartItems.length > 0 ? cartItems.length : 0}
             </span>
           </NavLink>
 

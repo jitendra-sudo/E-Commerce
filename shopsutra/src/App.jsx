@@ -11,6 +11,10 @@ import Cart from './pages/Cart'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './compound/Navbar'
 import Footer from './compound/Footer'
+import store from './ContextApi/store.js'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const App = () => {
   return (
     <div className="px-0 md:px-2 lg:px-20" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -33,7 +37,7 @@ const App = () => {
         {/* <hr className='text-gray-300 ' /> */}
         <Footer />
       </div>
-
+      <ToastContainer position="top-right" autoClose={2000} theme="light" />
     </div>
   )
 }
