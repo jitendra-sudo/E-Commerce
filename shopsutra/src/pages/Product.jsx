@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-import { useLocation } from 'react-router-dom';
+import { useLocation,useNavigate  } from 'react-router-dom';
 import ReviewModal from '../compound/review'
+import { useDispatch, useSelector  } from 'react-redux';
 import Avatar from '@mui/material/Avatar';
-// import Rating from '@mui/material/Rating';
-=======
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { addToCart, removeFromCart, decreaseQuantity, clearCart } from '../ContextApi/Cart.slice.js';
-import { toast } from 'react-toastify';
->>>>>>> 9c6f37827dcc440cbb100ecd014b404d34f4ec44
+import Rating from '@mui/material/Rating';
 
 function Product() {
   const dispatch = useDispatch();
@@ -19,7 +13,6 @@ function Product() {
   const item = location.state;
   const [rating, setRating] = useState(3.5);
   const [selectedSize, setSelectedSize] = useState(null);
-<<<<<<< HEAD
   const [select, setSelect] = useState(true)
   const [showModal, setShowModal] = useState(false);
   const [reviewImg, setReviewImg] = useState('');
@@ -41,11 +34,6 @@ function Product() {
   };
 
   console.log(item)
-=======
-  const [reviewImg, setReviewImg] = useState('');
-
-  console.log(cartItems)
->>>>>>> 9c6f37827dcc440cbb100ecd014b404d34f4ec44
 
   useEffect(() => {
     if (item?.image?.length > 0) {
@@ -101,19 +89,11 @@ function Product() {
   };
 
   return (
-<<<<<<< HEAD
     <div className='py-8 px-2 md:px-4 lg:px-0'>
       <div className=' block lg:flex gap-4 '>
         {/* left */}
         <div className='flex flex-col-reverse md:flex-row h-full w-full md:w-full xl:w-[70%] md:gap-13 lg:gap-2 gap-3 px-0 md:px-12 lg:px-0 pb-8'>
           <div className='flex flex-row  md:flex-col justify-between gap-1'>
-=======
-    <div>
-      <div className='py-8 px-2 md:px-4 lg:px-0 block lg:flex gap-4'>
-        {/* Left section */}
-        <div className='flex flex-col-reverse md:flex-row w-full md:gap-13 lg:gap-2 gap-3 px-0 md:px-12 lg:px-0 pb-8'>
-          <div className='flex flex-row md:flex-col justify-between gap-1'>
->>>>>>> 9c6f37827dcc440cbb100ecd014b404d34f4ec44
             {item?.image?.map((img, index) => (
               <img
                 key={index}
@@ -185,7 +165,6 @@ function Product() {
           </div>
         </div>
       </div>
-<<<<<<< HEAD
       <div className='py-4'>
         <div className='flex border-b border-gray-300'>
           <button
@@ -198,15 +177,6 @@ function Product() {
             onClick={() => setSelect(false)}
             className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-black hover:text-black transition'
           >
-=======
-
-      <div>
-        <div className='flex py-4'>
-          <button className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-gray-800 hover:text-gray-800 transition'>
-            Description
-          </button>
-          <button className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-gray-800 hover:text-gray-800 transition'>
->>>>>>> 9c6f37827dcc440cbb100ecd014b404d34f4ec44
             Reviews
           </button>
         </div>
