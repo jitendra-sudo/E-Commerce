@@ -3,7 +3,7 @@ import Assets from '../assets/hero_img.png'
 
 function banner() {
     return (
-        <div className='flex justify-center items-center w-full'>
+        <div className='flex px-3 md:px-0 justify-center items-center w-full'>
             <div className='flex flex-col md:flex-row border-1 border-gray-400 justify-between items-center gap-4 md:gap-8'>
                 <div className='flex justify-center items-center py-12 w-full '>
                     <div className='w-full md:w-[400px] gap-3 flex flex-col justify-center'>
