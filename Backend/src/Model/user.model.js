@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     profilePicture: { type: String, default: 'https://images.news9live.com/wp-content/uploads/2023/08/cropped-image-2082.png?w=900&enlarge=true' },
     otp: {
-        type: String,
+        type: String,     
     },
     otpExpiry: {
         type: Date,
@@ -24,16 +24,13 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Method to hash the password before saving
+
 userSchema.pre('save', async function (next) {
-    if (!this.isModified(passward)) { return next() }
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-        next();
-    } catch (error) {
-        next(error);
-    }
-})
+    if (!this.isModified('password')) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
 
 // Method to compare the password
 userSchema.methods.comparePassword = async function (Passward) {
