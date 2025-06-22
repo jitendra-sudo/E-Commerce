@@ -12,18 +12,16 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     profilePicture: { type: String, default: 'https://images.news9live.com/wp-content/uploads/2023/08/cropped-image-2082.png?w=900&enlarge=true' },
     otp: {
-        type: String,     
+        type: String,
     },
     otpExpiry: {
         type: Date,
     },
     isVerified: { type: Boolean, default: false },
     cartData: { type: Array, default: [] },
-    wishlistData: { type: Array, default: [] },
     refreshToken: { type: String, default: null },
 }, { timestamps: true });
 
-// Method to hash the password before saving
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
