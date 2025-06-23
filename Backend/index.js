@@ -10,6 +10,7 @@ const WishlistRoutes = require('./src/Routes/wishlist.routes.js');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 app.use('/api', userRoutes);
 app.use('/api/', productRoutes);
 app.use('/api', orderRoutes);
