@@ -51,20 +51,19 @@ const removeProduct = async (req, res) => {
 }
 
 const singleProduct = async (req, res) => {
-    const { productId } = req.body;
-    const { userId } = req.userId;
+    const { productId } = req.params;
     try {
-        const product = await Product.findById(productId)
+        const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
         res.status(200).json(product);
-
     } catch (error) {
         console.error("Error fetching product:", error);
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-}
+};
+
 
 const UserProducts = async (req, res) => {
     const { userId } = req.userId;
@@ -81,4 +80,4 @@ const UserProducts = async (req, res) => {
 }
 
 
-module.exports = { AddProduct, getAllProducts, removeProduct, singleProduct , UserProducts };
+module.exports = { AddProduct, getAllProducts, removeProduct, singleProduct, UserProducts };

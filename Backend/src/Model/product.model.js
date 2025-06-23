@@ -12,7 +12,7 @@ const productSchema = mongoose.Schema({
     sizes: { type: Array, required: true },
     bestseller: { type: Boolean, default: false },
     newarrival: { type: Boolean, default: true },
-}, { timestamps: true })
+}, { timestamps: true } )
 
 
 module.exports = mongoose.model('Product', productSchema);

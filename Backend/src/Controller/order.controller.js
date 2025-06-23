@@ -1,21 +1,12 @@
-const Order = require('../Models/order.model.js');
+const Order = require('../Model/order.model.js');
 const Razorpay = require('../Utils/razorpay.js');
 const stripe = require('../Utils/stripe.js');
 
-
-// COD (Cash on Delivery) 
 const createOrder = async (req, res) => {
     const { products, totalAmount, shippingAddress, paymentMethod } = req.body;
     const userId = req.userId;
     try {
-        const order = new Order({
-            userId,
-            products,
-            totalAmount,
-            shippingAddress,
-            paymentMethod
-        });
-
+        const order = new Order({ userId, products, totalAmount, shippingAddress, paymentMethod });
         await order.save();
         res.status(201).json({ message: 'Order created successfully', order });
     } catch (error) {
@@ -23,7 +14,6 @@ const createOrder = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 const getUserOrders = async (req, res) => {
     const { userId } = req.userId;
     try {
@@ -43,7 +33,6 @@ const getAllOrders = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 const updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
@@ -62,7 +51,6 @@ const updateOrderStatus = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 const deleteOrder = async (req, res) => {
     const { orderId } = req.params;
 
@@ -77,7 +65,6 @@ const deleteOrder = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 const placeOrderStripe = async (req, res) => {
     const { products, totalAmount, shippingAddress } = req.body;
 
@@ -119,7 +106,6 @@ const placeOrderStripe = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
 const placeOrderRazorpay = async (req, res) => {
     const { products, totalAmount, shippingAddress } = req.body;
 
@@ -154,7 +140,5 @@ const placeOrderRazorpay = async (req, res) => {
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 }
-
-
 
 module.exports = { createOrder, getUserOrders, getAllOrders, updateOrderStatus, deleteOrder, placeOrderRazorpay, placeOrderStripe };
