@@ -8,7 +8,11 @@ const connectDB = require('./src/Utils/db.js');
 const WishlistRoutes = require('./src/Routes/wishlist.routes.js');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.static('public'));
 app.use('/api', userRoutes);

@@ -3,12 +3,13 @@ import Api from './Api';
 import { toast } from 'react-toastify';
 
 function Register({ showModal, setShowModal, setShowLogin }) {
-    const defaultFormData = { name: '', username: '', email: '', password: '', phone: '', role: 'user', };
+    const defaultFormData = { name: '', username: '', email: '', password: '', phone: '', role: 'user' };
     const [formData, setFormData] = useState(defaultFormData);
     const [showOTP, setShowOTP] = useState(false);
     const [otp, setOtp] = useState('');
     const [otpError, setOtpError] = useState('');
     const [loading, setLoading] = useState(false);
+
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,22 +22,24 @@ function Register({ showModal, setShowModal, setShowLogin }) {
             toast.error("Please fill all fields.");
             return;
         }
+
         setLoading(true);
+
         try {
             const response = await Api.post('/register', formData);
             console.log('Registration response:', response.data);
-            toast.error(response.message);
-            toast.success("Please verify your OTP.");
+
+            toast.success(response.data.message || "Registered successfully!");
             setShowOTP(true);
         } catch (error) {
-            const message =
-                error.response?.data?.message
+            const message = error.response?.data?.message || error.message || "Something went wrong";
             toast.error(message);
-
+            console.error("Frontend registration error:", message);
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleOtpVerify = async (e) => {
         e.preventDefault();
