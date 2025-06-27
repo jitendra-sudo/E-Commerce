@@ -81,7 +81,7 @@ const LogoutUser = async (req, res) => {
 }
 
 const VerifyOTP = async (req, res) => {
-    const { email, otp, otpExpiry } = req.body;
+    const { email, otp } = req.body;
     const user = await User.findOne({ email });
 
     if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
