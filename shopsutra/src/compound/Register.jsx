@@ -59,9 +59,9 @@ function Register({ showModal, setShowModal, setShowLogin }) {
             }
 
         } catch (error) {
-            console.error('Error during OTP verification:', error);
+            const message = error.response?.data?.message || error.message || "Something went wrong";
+            toast.error(message);
         }
-        console.log('Verifying OTP:', otp);
         setShowModal(false);
         setShowOTP(false);
         setFormData(defaultFormData);
@@ -120,7 +120,7 @@ function Register({ showModal, setShowModal, setShowLogin }) {
                                         type="submit"
                                         className="w-full bg-yellow-600 hover:bg-amber-500 text-white py-2 rounded"
                                     >
-                                        {loading ? <span className="ml-2 spinner-border spinner-border-sm"></span> : "Register"}
+                                        {loading ? <span >loading...</span> : "Register"}
                                     </button>
                                 </form>
                                 <p className="text-center font-sans mt-4">

@@ -37,23 +37,19 @@ const RegisterUser = async (req, res) => {
 const LoginUser = async (req, res) => {
     const { username, email, phone , password } = req.body;
     try {
-        // Find user by username
         const user = await User.findOne({ $or: [{ username }, { email }, { phone }] }).select('+password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Generate OTP
         const otp = generateOTP(6);
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
 
-        // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        // Generate tokens
         const refreshToken = user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         user.refreshToken = refreshToken;
@@ -85,7 +81,7 @@ const LogoutUser = async (req, res) => {
 }
 
 const VerifyOTP = async (req, res) => {
-    const { email, otp } = req.body;
+    const { email, otp, otpExpiry } = req.body;
     const user = await User.findOne({ email });
 
     if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
