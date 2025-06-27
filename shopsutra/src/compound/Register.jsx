@@ -48,7 +48,7 @@ function Register({ showModal, setShowModal, setShowLogin }) {
                 toast.error('OTP is required');
                 return;
             }
-            const response = await Api.post('/verify-otp', { otp, phone: formData.phone });
+            const response = await Api.post('/verify-otp', { otp, email: formData?.email });
             console.log('OTP verification response:', response.data);
             if (response.data.success) {
                 toast.success("OTP verified successfully!");
