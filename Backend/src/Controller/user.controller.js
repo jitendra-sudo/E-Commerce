@@ -2,6 +2,7 @@ const generateOTP = require('../Utils/otp');
 const User = require('../Model/user.model');
 const sendMail = require('../Utils/mailer');
 const uploadImage = require('../Utils/cloudinary');
+const tempUserStore = require('../Utils/tempUserStore');
 
 
 const RegisterUser = async (req, res) => {
@@ -30,7 +31,7 @@ const RegisterUser = async (req, res) => {
 const LoginUser = async (req, res) => {
     const { username, email, phone, password } = req.body;
     try {
-        const user = await User.findOne({ $or: [{ username }, { email }, { phone }] })
+        const user = await User.findOne({ $or: [{ username }, { email }, { phone }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -39,16 +40,20 @@ const LoginUser = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
+
         const refreshToken = user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         user.refreshToken = refreshToken;
-        user.otpExpiry = otpExpiry;
+
         await user.save();
+
         res.status(200).json({ message: 'Login successful', accessToken });
     } catch (error) {
+        console.error('Login error:', error); 
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
+
 
 const LogoutUser = async (req, res) => {
     const { userId } = req;
