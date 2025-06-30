@@ -5,7 +5,7 @@ const uploadImage = require('../Utils/cloudinary');
 
 
 const RegisterUser = async (req, res) => {
-    const { name, username, email, password, phone, address, role, profilePicture } = req.body;
+    const { name, username, email, password, phone, address, role } = req.body;
 
     try {
         const existingUser = await User.findOne({ $or: [{ username }, { email }, { phone }] });
@@ -14,37 +14,26 @@ const RegisterUser = async (req, res) => {
         }
 
         const otp = generateOTP(6);
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-        const newUser = new User({ name, username, email, password, phone, address, role: role || 'user', otp, otpExpiry, isVerified: false, profilePicture });
-        const refreshToken = newUser.generateRefreshToken();
-        const accessToken = newUser.generateAccessToken();
-        newUser.refreshToken = refreshToken;
-        await newUser.save();
-        await sendMail(email, 'Verify your email - OTP', `Your OTP is: ${otp}`);
+        const otpExpiry = Date.now() + 10 * 60 * 1000;
 
-        res.status(201).json({
-            message: 'User registered successfully. Please verify your email.',
-            refreshToken,
-            accessToken,
-        });
+        tempUserStore.set(email, { name, username, email, password, phone, address, role: role || 'user', otp, otpExpiry, });
+        await sendMail(email, 'Verify your email - OTP', `Your OTP is: ${otp}`);
+        res.status(200).json({ message: 'OTP sent to your email' });
 
     } catch (error) {
-        console.error('Registration Error:', error);
+        console.error('OTP Request Error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
+
 const LoginUser = async (req, res) => {
-    const { username, email, phone , password } = req.body;
+    const { username, email, phone, password } = req.body;
     try {
-        const user = await User.findOne({ $or: [{ username }, { email }, { phone }] }).select('+password');
+        const user = await User.findOne({ $or: [{ username }, { email }, { phone }] })
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
-        const otp = generateOTP(6);
-        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
 
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
@@ -53,17 +42,14 @@ const LoginUser = async (req, res) => {
         const refreshToken = user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         user.refreshToken = refreshToken;
-        user.otp = otp;
         user.otpExpiry = otpExpiry;
-        await sendMail(user.email, 'Login OTP', `Your OTP for login is: ${otp}`);
-        user.isVerified = false;
         await user.save();
-        res.status(200).json({ message: 'Login successful', refreshToken, accessToken });
-
+        res.status(200).json({ message: 'Login successful', accessToken });
     } catch (error) {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 const LogoutUser = async (req, res) => {
     const { userId } = req;
     try {
@@ -81,7 +67,7 @@ const LogoutUser = async (req, res) => {
 }
 
 const VerifyOTP = async (req, res) => {
-    const { email, otp } = req.body;
+    const { name, username, email, password, phone, address, role, otp } = req.body;
     const user = await User.findOne({ email });
 
     if (!user || user.otp !== otp || user.otpExpiry <= Date.now()) {
@@ -95,30 +81,51 @@ const VerifyOTP = async (req, res) => {
     res.status(200).json({ message: 'OTP verified successfully' });
 };
 
-const ResendOTP = async (req, res) => {
-    const { email } = req.body;
+const verifyOTP = async (req, res) => {
+    const { email, otp } = req.body;
+
+    const storedUser = tempUserStore.get(email);
+
+    if (!storedUser) {
+        return res.status(400).json({ message: 'No OTP requested for this email' });
+    }
+
+    if (storedUser.otp !== otp || storedUser.otpExpiry <= Date.now()) {
+        return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
 
     try {
-        const user = await User.findOne({ email });
+        const newUser = new User({
+            name: storedUser.name,
+            username: storedUser.username,
+            email: storedUser.email,
+            password: storedUser.password,
+            phone: storedUser.phone,
+            address: storedUser.address,
+            role: storedUser.role,
+            isVerified: true,
+        });
 
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+        const refreshToken = newUser.generateRefreshToken();
+        const accessToken = newUser.generateAccessToken();
+        newUser.refreshToken = refreshToken;
 
-        const otp = generateOTP();
+        await newUser.save();
 
-        user.otp = otp;
-        user.otpExpiry = Date.now() + 10 * 60 * 1000;
-        await user.save();
+        tempUserStore.delete(email);
 
-        await sendMail(email, 'Your OTP Code', `Your OTP code is: ${otp}`);
+        res.status(201).json({
+            message: 'OTP verified, user registered successfully',
+            refreshToken,
+            accessToken,
+        });
 
-        res.status(200).json({ message: 'OTP resent successfully' });
     } catch (error) {
-        console.error('Error resending OTP:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Verify OTP Error:', error);
+        res.status(500).json({ message: 'Failed to register user' });
     }
 };
+
 
 const Profile = async (req, res) => {
     const { userId, } = req;
@@ -179,9 +186,9 @@ const AddtoCart = async (req, res) => {
 
         const existingItem = user.cartData.find(item => item.productId === productId && item.size === size);
         if (existingItem) {
-            existingItem.quantity += quantity; // Update quantity if item already exists
+            existingItem.quantity += quantity; 
         } else {
-            user.cartData.push({ productId, quantity, size }); // Add new item to cart
+            user.cartData.push({ productId, quantity, size }); 
         }
         await user.save();
         res.status(200).json({ message: 'Item added to cart successfully', cartData: user.cartData });
