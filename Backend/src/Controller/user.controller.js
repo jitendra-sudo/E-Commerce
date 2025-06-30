@@ -66,22 +66,8 @@ const LogoutUser = async (req, res) => {
     }
 }
 
+
 const VerifyOTP = async (req, res) => {
-    const { name, username, email, password, phone, address, role, otp } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user || user.otp !== otp || user.otpExpiry <= Date.now()) {
-        return res.status(400).json({ message: 'Invalid or expired OTP' });
-    }
-
-    user.isVerified = true;
-    user.otp = null;
-    user.otpExpiry = null;
-    await user.save();
-    res.status(200).json({ message: 'OTP verified successfully' });
-};
-
-const verifyOTP = async (req, res) => {
     const { email, otp } = req.body;
 
     const storedUser = tempUserStore.get(email);
