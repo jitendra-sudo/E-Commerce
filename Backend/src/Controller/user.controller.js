@@ -172,9 +172,9 @@ const AddtoCart = async (req, res) => {
 
         const existingItem = user.cartData.find(item => item.productId === productId && item.size === size);
         if (existingItem) {
-            existingItem.quantity += quantity; 
+            existingItem.quantity += quantity;
         } else {
-            user.cartData.push({ productId, quantity, size }); 
+            user.cartData.push({ productId, quantity, size });
         }
         await user.save();
         res.status(200).json({ message: 'Item added to cart successfully', cartData: user.cartData });
@@ -206,6 +206,31 @@ const RemoveFromCart = async (req, res) => {
     }
 }
 
+
+const ResendOTP = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const otp = generateOTP();
+
+        user.otp = otp;
+        user.otpExpiry = Date.now() + 10 * 60 * 1000;
+        await user.save();
+
+        await sendMail(email, 'Your OTP Code', `Your OTP code is: ${otp}`);
+
+        res.status(200).json({ message: 'OTP resent successfully' });
+    } catch (error) {
+        console.error('Error resending OTP:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
 module.exports = { RegisterUser, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };
