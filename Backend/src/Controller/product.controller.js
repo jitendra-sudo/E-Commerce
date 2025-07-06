@@ -66,7 +66,7 @@ const singleProduct = async (req, res) => {
 
 
 const UserProducts = async (req, res) => {
-    const { userId } = req.userId;
+        const userId = req.userId;
     try {
         const products = await Product.find({ userId }).sort({ createdAt: -1 });
         if (!products || products.length === 0) {

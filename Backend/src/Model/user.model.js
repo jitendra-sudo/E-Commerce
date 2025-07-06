@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
     phone: { type: String, required: true, unique: true, trim: true },
-    address: { type: String, trim: true },
+    address: { type:Array, trim: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     profilePicture: { type: String, default: 'https://images.news9live.com/wp-content/uploads/2023/08/cropped-image-2082.png?w=900&enlarge=true' },
     otp: {

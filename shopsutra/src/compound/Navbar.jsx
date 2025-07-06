@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import logo from "../assets/logoshopSutra.png";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FaShoppingBag, FaHome, FaInfoCircle, FaPhone, FaThList } from "react-icons/fa";
@@ -7,8 +7,10 @@ import Avatar from '@mui/material/Avatar';
 import { FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import Searchbar from "./searchbar";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import Register from "./Register";
+import { toast } from "react-toastify";
+import Logout from '../compound/logout';
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,6 +19,12 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const [showRegister, setShowRegister] = useState(false);
+  const token = localStorage.getItem('token');
+  const dispatch = useDispatch();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
 
 
   useEffect(() => {
@@ -35,12 +43,29 @@ const Navbar = () => {
     { path: "/contact", label: "Contact", icon: <FaPhone /> },
   ];
 
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
   return (
     <>
+      <Register showModal={showRegister} setShowModal={setShowRegister} />
+
       <div className="text-white py-4 flex justify-between items-center font-poppins relative z-50">
         {/* Logo */}
         <div className="w-20">
-          <img src={logo} alt="Logo" className="h-full" />
+          <img src={logo} alt="Logo" className="h-full" onClick={() => navigate("/")} />
         </div>
 
         {/* Desktop Nav */}
@@ -67,6 +92,7 @@ const Navbar = () => {
 
 
           {/* Orders */}
+
           <NavLink
             to="/orders"
             className="hidden lg:flex group flex-col text-sm gap-1 items-center text-gray-700 hover:text-gray-900"
@@ -87,31 +113,33 @@ const Navbar = () => {
           </NavLink>
 
           {/* Avatar Dropdown */}
-          <NavLink
-            to=""
-            className="flex group flex-col items-center text-gray-700 hover:text-gray-900 relative"
-          >
+          <div ref={dropdownRef} onClick={() => { if (!token) { setShowRegister(true); } else { setDropdownOpen(true); } }} className="flex flex-col items-center text-gray-700 hover:text-gray-900 relative"    >
             <Avatar src="" sx={{ height: 28, width: 28 }} alt="User" />
-            <div className="dropdown-content hidden group-hover:block absolute rounded-lg bg-white text-gray-700 shadow-lg border border-gray-300 top-8 right-0 p-4 z-50">
-              <ul className="space-y-2">
-                <li>
-                  <NavLink to="/profile" className="hover:text-gray-900">
-                    Profile
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/settings" className="hover:text-gray-900">
-                    Settings
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/logout" className="hover:text-gray-900">
-                    Logout
-                  </NavLink>
-                </li>
-              </ul>
-            </div>
-          </NavLink>
+            {token && dropdownOpen && (
+              <div className="dropdown-content absolute rounded-lg bg-white text-gray-700 shadow-lg border border-gray-300 top-8 right-0 p-4 z-50">
+                <ul className="space-y-2">
+                  <li>
+                    <NavLink to="/profile" className="hover:text-gray-900">Profile</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/settings" className="hover:text-gray-900">Settings</NavLink>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        Logout(dispatch);
+                        setDropdownOpen(false);
+                      }}
+                      className="hover:text-gray-900 w-full text-left"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+
 
           <button
             onClick={() => setSliderOpen(true)}

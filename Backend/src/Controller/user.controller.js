@@ -3,10 +3,11 @@ const User = require('../Model/user.model');
 const sendMail = require('../Utils/mailer');
 const uploadImage = require('../Utils/cloudinary');
 const tempUserStore = require('../Utils/tempUserStore');
+const mongoose = require('mongoose');
 
 
 const RegisterUser = async (req, res) => {
-    const { name, username, email, password, phone, address, role } = req.body;
+    const { name, username, email, password, phone ,role } = req.body;
 
     try {
         const existingUser = await User.findOne({ $or: [{ username }, { email }, { phone }] });
@@ -17,7 +18,7 @@ const RegisterUser = async (req, res) => {
         const otp = generateOTP(6);
         const otpExpiry = Date.now() + 10 * 60 * 1000;
 
-        tempUserStore.set(email, { name, username, email, password, phone, address, role: role || 'user', otp, otpExpiry, });
+        tempUserStore.set(email, { name, username, email, password, phone, role: role || 'user', otp, otpExpiry, });
         await sendMail(email, 'Verify your email - OTP', `Your OTP is: ${otp}`);
         res.status(200).json({ message: 'OTP sent to your email' });
 
@@ -26,7 +27,6 @@ const RegisterUser = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
 
 const LoginUser = async (req, res) => {
     const { username, email, phone, password } = req.body;
@@ -49,11 +49,10 @@ const LoginUser = async (req, res) => {
 
         res.status(200).json({ message: 'Login successful', accessToken });
     } catch (error) {
-        console.error('Login error:', error); 
+        console.error('Login error:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
 
 const LogoutUser = async (req, res) => {
     const { userId } = req;
@@ -70,7 +69,6 @@ const LogoutUser = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-
 
 const VerifyOTP = async (req, res) => {
     const { email, otp } = req.body;
@@ -117,7 +115,6 @@ const VerifyOTP = async (req, res) => {
     }
 };
 
-
 const Profile = async (req, res) => {
     const { userId, } = req;
     try {
@@ -134,15 +131,26 @@ const Profile = async (req, res) => {
 
 const uploadUrl = async (req, res) => {
     try {
-        res.status(200).json({ imageUrl: req.imageUrl });
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'No files uploaded' });
+        }
+
+        const imageUrls = req.files.map(file => file.path);
+
+        res.status(200).json({
+            message: 'Upload successful',
+            count: imageUrls.length,
+            imageUrls,
+        });
     } catch (error) {
-        console.error('Error in uploadUrl:', error);
+        console.error('Error uploading images:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
+
 const AdminProfile = async (req, res) => {
-    const { userId } = req.userId;
+        const userId = req.userId;
     const { email, password } = req.body;
 
     try {
@@ -167,7 +175,7 @@ const AdminProfile = async (req, res) => {
 }
 
 const AddtoCart = async (req, res) => {
-    const { userId } = req.userId;
+        const userId = req.userId;
     const { productId, quantity, size } = req.body;
     try {
         const user = await User.findById(userId);
@@ -192,7 +200,7 @@ const AddtoCart = async (req, res) => {
 }
 
 const RemoveFromCart = async (req, res) => {
-    const { userId } = req.userId;
+        const userId = req.userId;
     const { productId, size } = req.body;
 
     try {
@@ -237,5 +245,81 @@ const ResendOTP = async (req, res) => {
     }
 };
 
+const Address = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const { firstname, lastname, email, street, city, state, country, pincode, phonenumber } = req.body;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-module.exports = { RegisterUser, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };
+        const newAddress = { id: new mongoose.Types.ObjectId(), firstname, lastname, email, street, city, state, country, pincode, phonenumber };
+        user.address.push(newAddress);
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Address added successfully',
+            address: user.address
+        });
+
+    } catch (error) {
+        console.error("Error adding address:", error);
+        return res.status(500).json({
+            message: 'Something went wrong',
+            error: error.message
+        });
+    }
+};
+
+const AddressList = async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const user = await User.findById(userId).select('address');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ address: user.address });
+    } catch (error) {
+        console.error('Error fetching address list:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+const AddressDelete = async (req, res) => {
+    const userId = req.userId;
+    const addressId = req.params.id;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const originalLength = user.address.length;
+
+        user.address = user.address.filter(
+            (address) => address.id.toString() !== addressId
+        );
+
+        if (user.address.length === originalLength) {
+            return res.status(404).json({ message: 'Address not found' });
+        }
+
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Address deleted successfully',
+            address: user.address
+        });
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+module.exports = { RegisterUser, AddressList, AddressDelete, Address, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };

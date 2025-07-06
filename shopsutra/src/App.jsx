@@ -14,30 +14,25 @@ import Footer from './compound/Footer'
 import store from './ContextApi/store.js'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Register from './compound/Register.jsx'
+import ProtectedRoute from './compound/protectedRoute.jsx';
 
 const App = () => {
-  const [showRegister, setShowRegister] = useState(true);
   return (
     <div className="px-0 md:px-2 lg:px-20" style={{ fontFamily: 'Poppins, sans-serif' }}>
       <Navbar />
       <hr className=' text-gray-300' />
-      <Register showModal={showRegister} setShowModal={setShowRegister}  />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/about' element={<About />} />
         <Route path='/collection' element={<Collection />} />
         <Route path='/contact' element={<Contact />} />
-        <Route path='/orders' element={<Orders />} />
+        <Route path='/orders' element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path='/product/:id' element={<Product />} />
-        <Route path='/cart' element={<Cart />} />
-        <Route path='/placeorder' element={<PlaceOrder />} />
-
+        <Route path='/cart' element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path='/placeorder' element={<ProtectedRoute><PlaceOrder /></ProtectedRoute>} />
       </Routes>
-      <div className='pt-6'>
-        {/* <hr className='text-gray-300 ' /> */}
-      </div>
+
       <Footer />
 
       <ToastContainer position="top-right" autoClose={2000} theme="light" />

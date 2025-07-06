@@ -4,6 +4,7 @@ import ReviewModal from '../compound/review'
 import { useDispatch, useSelector  } from 'react-redux';
 import Avatar from '@mui/material/Avatar';
 import Rating from '@mui/material/Rating';
+import { addToCart } from '../ContextApi/Cart.slice';
 
 function Product() {
   const dispatch = useDispatch();
@@ -84,8 +85,9 @@ function Product() {
       alert("Please select a size before buying.");
       return;
     }
-    dispatch(addToCart({ ...item, selectedSize }));
-    navigate('/cart');
+
+    const uniqueItem = { ...item, selectedSize, _id: `${item._id}-${selectedSize}` };
+    navigate('/placeorder' , { state: { item: uniqueItem } });
   };
 
   return (
@@ -166,7 +168,7 @@ function Product() {
         </div>
       </div>
       <div className='py-4'>
-        <div className='flex border-b border-gray-300'>
+        <div className='flex  gap-2'>
           <button
             onClick={() => setSelect(true)}
             className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-black hover:text-black transition'
