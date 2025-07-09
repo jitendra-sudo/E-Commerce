@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser, verifyOtp } from '../ContextApi/AuthSlice';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 function Register({ showModal, setShowModal }) {
     const dispatch = useDispatch();
@@ -13,6 +14,7 @@ function Register({ showModal, setShowModal }) {
     const [showLogin, setShowLogin] = useState(true);
     const token = localStorage.getItem('token')
     const [showOTP, setShowOTP] = useState(false)
+    const navigate = useNavigate()
 
 
     const handleChange = (e) => {

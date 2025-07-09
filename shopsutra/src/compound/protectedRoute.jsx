@@ -1,21 +1,29 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import Register from "./Register";
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-  const [showRegister, setShowRegister] = useState(true);
   const token = localStorage.getItem('token');
   const location = useLocation();
+  const navigate = useNavigate();
 
-  if (!token) {
-    return (
-      <>
-        <Register showModal={showRegister} setShowModal={setShowRegister} />
-      </>
-    );
+  useEffect(() => {
+    if (location.pathname === '/login' && token) {
+      navigate('/', { replace: true });
+    }
+
+    if (!token && location.pathname !== '/login') {
+      navigate('/login', { replace: true });
+    }
+
+    if (!token && !location.pathname !== '/login') {
+      navigate('/login', { replace: true });
+    }
+  }, [token, location.pathname, navigate]);
+
+  if (!token && location.pathname !== '/login') {
+    return null;
   }
 
-  // If user is already authenticated, allow access
   return children;
 };
 

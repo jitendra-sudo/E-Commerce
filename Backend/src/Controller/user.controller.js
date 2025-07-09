@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 
 const RegisterUser = async (req, res) => {
-    const { name, username, email, password, phone ,role } = req.body;
+    const { name, username, email, password, phone, role } = req.body;
 
     try {
         const existingUser = await User.findOne({ $or: [{ username }, { email }, { phone }] });
@@ -116,7 +116,8 @@ const VerifyOTP = async (req, res) => {
 };
 
 const Profile = async (req, res) => {
-    const { userId, } = req;
+    const userId = req.userId;
+
     try {
         const user = await User.findById(userId).select('-password -refreshToken');
         if (!user) {
@@ -148,9 +149,8 @@ const uploadUrl = async (req, res) => {
     }
 };
 
-
 const AdminProfile = async (req, res) => {
-        const userId = req.userId;
+    const userId = req.userId;
     const { email, password } = req.body;
 
     try {
@@ -175,7 +175,7 @@ const AdminProfile = async (req, res) => {
 }
 
 const AddtoCart = async (req, res) => {
-        const userId = req.userId;
+    const userId = req.userId;
     const { productId, quantity, size } = req.body;
     try {
         const user = await User.findById(userId);
@@ -200,7 +200,7 @@ const AddtoCart = async (req, res) => {
 }
 
 const RemoveFromCart = async (req, res) => {
-        const userId = req.userId;
+    const userId = req.userId;
     const { productId, size } = req.body;
 
     try {
@@ -218,7 +218,6 @@ const RemoveFromCart = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-
 
 const ResendOTP = async (req, res) => {
     const { email } = req.body;
@@ -288,7 +287,6 @@ const AddressList = async (req, res) => {
     }
 };
 
-
 const AddressDelete = async (req, res) => {
     const userId = req.userId;
     const addressId = req.params.id;
@@ -321,5 +319,35 @@ const AddressDelete = async (req, res) => {
     }
 };
 
+const EditProfile = async (req, res) => {
+  try {
+    const userId = req.userId; 
+    const updateData = req.body;
 
-module.exports = { RegisterUser, AddressList, AddressDelete, Address, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };
+    delete updateData.password;
+    delete updateData.role;
+    delete updateData.refreshToken;
+    delete updateData.email; 
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Profile updated successfully',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('EditProfile error:', error);
+    return res.status(500).json({ message: 'Something went wrong', error: error.message });
+  }
+};
+
+
+module.exports = { RegisterUser,EditProfile, AddressList, AddressDelete, Address, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };

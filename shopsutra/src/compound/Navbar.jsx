@@ -24,9 +24,8 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-
-
+const { user } = useSelector((state) => state.auth);
+   console.log(user)
   useEffect(() => {
     if (location.pathname === '/collection') {
       setStatus(true);
@@ -63,12 +62,10 @@ const Navbar = () => {
       <Register showModal={showRegister} setShowModal={setShowRegister} />
 
       <div className="text-white py-4 flex justify-between items-center font-poppins relative z-50">
-        {/* Logo */}
         <div className="w-20">
           <img src={logo} alt="Logo" className="h-full" onClick={() => navigate("/")} />
         </div>
 
-        {/* Desktop Nav */}
         <ul className="hidden text-gray-700 gap-8 lg:flex text-sm">
           {navItems.map(({ path, label }) => (
             <li key={path}>
@@ -83,15 +80,12 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Right Controls */}
         <div className="flex justify-end items-center gap-4 md:gap-8">
-          {/* Search */}
           <button onClick={() => setStatus(!status)} >
             <FaSearch className="h-4 w-4 text-gray-500 mx-2" />
           </button>
 
 
-          {/* Orders */}
 
           <NavLink
             to="/orders"
@@ -101,7 +95,6 @@ const Navbar = () => {
             <hr className="w-2/4 h-[1.5px] bg-t group-hover:bg-gray-700 border-none" />
           </NavLink>
 
-          {/* Cart */}
           <NavLink
             to="/cart"
             className="group hidden lg:block text-gray-700 hover:text-gray-900 relative"
@@ -126,9 +119,10 @@ const Navbar = () => {
                   </li>
                   <li>
                     <button
-                      onClick={() => {
-                        Logout(dispatch);
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setDropdownOpen(false);
+                        Logout(dispatch);
                       }}
                       className="hover:text-gray-900 w-full text-left"
                     >

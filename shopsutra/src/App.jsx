@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
-import Login from './pages/Login'
 import About from './pages/About'
 import Collection from './pages/Collection'
 import Contact from './pages/Contact'
@@ -11,6 +10,7 @@ import Cart from './pages/Cart'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './compound/Navbar'
 import Footer from './compound/Footer'
+import Login from './compound/login.jsx'
 import store from './ContextApi/store.js'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,7 +23,7 @@ const App = () => {
       <hr className=' text-gray-300' />
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
+        <Route path='/login' element={<ProtectedRoute><Login /></ProtectedRoute>} />
         <Route path='/about' element={<About />} />
         <Route path='/collection' element={<Collection />} />
         <Route path='/contact' element={<Contact />} />

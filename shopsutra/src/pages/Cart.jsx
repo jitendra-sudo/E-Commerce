@@ -1,11 +1,13 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, removeFromCart, decreaseQuantity } from '../ContextApi/Cart.slice.js';
+import { useNavigate } from 'react-router-dom';
 
 
 function Cart() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const navigate = useNavigate();
   console.log(cartItems);
 
 
@@ -27,6 +29,12 @@ function Cart() {
       </div>
     );
   }
+
+  const handleProceed = () =>{
+       navigate('/placeorder')
+  }
+
+
   return (
     <div className=''>
       <div className='flex justify-between items-center  p-4'>
@@ -93,7 +101,7 @@ function Cart() {
             </p>
           </div>
 
-          <button className='w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white text-lg py-2 rounded shadow transition'>
+          <button onClick={handleProceed} className='w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white text-lg py-2 rounded shadow transition'>
             Proceed to Checkout
           </button>
         </div>

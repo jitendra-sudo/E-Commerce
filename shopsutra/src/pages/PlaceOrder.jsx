@@ -5,12 +5,17 @@ import stripeLogo from '../assets/stripe.png';
 import codLogo from '../assets/cod.png';
 import Api from '../compound/Api'
 import { toast } from 'react-toastify';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { loadRazorpayScript } from "../utils/razorpay";
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe("pk_test_51RRBdnCFrBP44Tl4yqHgQZJfecXttS40ctJHUqzUwy4ihNM28Id6T9Vnut2jqPsDe2Y20AvPylQzyLjcItllXKVQ00uryPnJnV");
 
 function PlaceOrder() {
   const [errors, setErrors] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentmethod, setPaymentMethod] = useState('cod');
+  const [paymentmethod, setPaymentMethod] = useState('COD');
   const [activeTab, setActiveTab] = useState(2);
   const [addressForm, setAddress] = useState({ firstname: '', lastname: '', email: '', street: '', city: '', state: '', country: '', pincode: '', phonenumber: '' });
   const token = localStorage.getItem('token');
@@ -18,14 +23,136 @@ function PlaceOrder() {
   const [selectedAddress, setSelectedAddress] = useState({});
   const paymentOptions = { RazorPay: razorpayLogo, Stripe: stripeLogo, COD: codLogo, };
   const location = useLocation();
-  const item = location.state || {};
+  const item = location?.state
+  const cartItems = useSelector((state) => state?.cart?.cartItems);
+  const navigate = useNavigate()
+
+
+  const HandlePaymentProcess = async () => {
+    let products = [];
+    let totalAmount = 0;
+
+    const shippingAddress = { name: `${selectedAddress.firstname} ${selectedAddress.lastname}`, addressLine1: selectedAddress.street, addressLine2: '', city: selectedAddress.city, state: selectedAddress.state, zipCode: selectedAddress.pincode, country: selectedAddress.country, };
+
+    if (item?.item) {
+      products = [{ productId: item.item._id, quantity: 1 }];
+      totalAmount = (item?.item?.price * 1.05) + 50;
+    } else if(paymentmethod === 'stripe'){
+  products = cartItems?.map(it => ({ productId: it._id, quantity: it.quantity , name:it.name || 1 }));
+      totalAmount = (cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 1.05 + 50).toFixed(2)
+    } else {
+      products = cartItems?.map(it => ({ productId: it._id, quantity: it.quantity || 1 }));
+      totalAmount = (cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 1.05 + 50).toFixed(2)
+    }
+
+    const orderData = { products, totalAmount, shippingAddress, paymentMethod: paymentmethod };
+
+    try {
+      if (paymentmethod === 'stripe') {
+        const stripe = await stripePromise;
+        if (!stripe) {
+          toast.error("Stripe failed to load");
+          return;
+        }
+
+        const res = await Api.post('/place-order-stripe', orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const sessionId = res.data?.stripeSession?.id; 
+
+        if (!sessionId) {
+          toast.error("Stripe session creation failed");
+          return;
+        }
+
+        const result = await stripe.redirectToCheckout({ sessionId });
+
+        if (result.error) {
+          toast.error(result.error.message);
+        }
+        
+      }
+      else if (paymentmethod === 'razorpay') {
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          toast.error("Razorpay SDK failed to load");
+          return;
+        }
+
+        const res = await Api.post('/place-order-razorpay', orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const { razorpayOrder, order } = res.data;
+
+        if (!razorpayOrder) {
+          toast.error("Failed to create Razorpay order");
+          return;
+        }
+
+        const options = {
+          key: 'rzp_test_H3KvyfMmbSSpw7',
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency,
+          name: "ShopSutra Store",
+          description: "Order Payment",
+          order_id: razorpayOrder.id,
+          handler: async function (response) {
+            try {
+              await Api.post('/placeOrder', {
+                ...orderData,
+                paymentDetails: response,
+                razorpayOrderId: razorpayOrder.id,
+                razorpayPaymentId: response.razorpay_payment_id,
+              }, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              toast.success("✅ Razorpay payment successful & order placed!");
+              navigate('/orders');
+
+            } catch (err) {
+              toast.error("❌ Payment succeeded but order confirmation failed!");
+            }
+          },
+          prefill: {
+            name: shippingAddress.name,
+            email: "user@example.com",
+            contact: selectedAddress.phonenumber
+          },
+          notes: {
+            address: shippingAddress.addressLine1
+          },
+          theme: {
+            color: "#3399cc"
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+      else {
+        await Api.post('/placeOrder', orderData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success("Order placed successfully!");
+          navigate('/orders');
+          
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while placing the order!");
+    }
+  };
+
 
   const HandleAddress = async () => {
     try {
       const res = await Api.get('./address-list', { headers: { Authorization: `Bearer ${token}` } })
       setAddressList(res?.data?.address)
       setSelectedAddress(res?.data?.address[0])
-      console.log(res)
     } catch (error) {
       console.log(error)
     }
@@ -71,10 +198,6 @@ function PlaceOrder() {
       toast.error(error?.res?.data?.message || "error in delete")
     }
   }
-  const HandlePaymentProcess = () => {
-
-  }
-
 
   return (
     <div className='p-4'>
@@ -98,7 +221,7 @@ function PlaceOrder() {
 
             <div className="flex gap-2">
               <input type="text" name="country" value={addressForm.country} onChange={HandleChange} placeholder="Country" className="w-full p-2 my-2 border border-gray-300 rounded-sm" />
-              <input type="text" name="pincode" value={addressForm.pinCode} onChange={HandleChange} placeholder="Pin Code" className="w-full p-2 my-2 border border-gray-300 rounded-sm" />
+              <input type="text" name="pincode" value={addressForm.pincode} onChange={HandleChange} placeholder="Pin Code" className="w-full p-2 my-2 border border-gray-300 rounded-sm" />
             </div>
 
             <input type="text" name="phonenumber" value={addressForm.phonenumber} onChange={HandleChange} placeholder="Phone Number" className="w-full p-2 my-2 border border-gray-300 rounded-sm" />
@@ -119,15 +242,18 @@ function PlaceOrder() {
                 <div className="flex justify-between items-center gap-2 mb-2">
                   <div className='flex gap-2'>
                     <input type="checkbox" checked={selectedAddress?.id === item?.id} onChange={() => { setSelectedAddress(item); }} />
-                    <span className='text-lg font-bold'>Delivery Address</span>
+                    <span className='text-sm font-bold'>Delivery Address</span>
                   </div>
 
-                  <button onClick={(e) =>{  e.stopPropagation;  handleDelete(item?.id)}}><img className='h-6 w-6' src='https://img.icons8.com/?size=100&id=3YiG3AFVcoqg&format=png&color=000000' /></button>
+                  <button onClick={(e) => { e.stopPropagation; handleDelete(item?.id) }}><img className='h-6 w-6' src='https://img.icons8.com/?size=100&id=3YiG3AFVcoqg&format=png&color=000000' /></button>
                 </div>
-                <p>{item.firstname} {item.lastname}</p>
-                <p>{item.email}</p>
-                <p>{item.street}, {item.city}, {item.state}, {item.country} - {item.pinCode}</p>
-                <p>Phone: {item.phonenumber}</p>
+                <div >
+
+                </div>
+                <p className='text-sm'>{item.firstname} {item.lastname}</p>
+                <p className='truncate text-sm'>{item.email}</p>
+                <p className='text-sm'>{item.street}, {item.city}, {item.state}, {item.country} - {item.pinCode}</p>
+                <p className='text-sm'>Phone: {item.phonenumber}</p>
               </label>
             ))}
           </div>
@@ -140,16 +266,24 @@ function PlaceOrder() {
           <div className='flex flex-col gap-2 p-2'>
             <p className='text-lg font-bold'>Cart Summary</p>
             <div className='flex justify-between'>
-              <span>Items:</span> <span>3</span>
+              <span>Items:</span> <span>{item ? 1 : cartItems.reduce((total, item) => total + item.quantity, 0)}</span>
             </div>
             <div className='flex justify-between'>
-              <span>Total Price:</span>  <span>₹ 1500</span>
+              <span>Total Price:</span><span>₹{item ? item?.item?.price : cartItems.reduce((total, item) => total + item.price * item.quantity, 0)}</span>
             </div>
             <div className='flex justify-between'>
-              <span>Shipping:</span>    <span>Free</span>
+              <span>Tax (5%):</span>
+              <span>  ₹ {item ? (item?.item?.price * 0.05) : (cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 0.05).toFixed(2)}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span>Shipping:</span><span>₹ 50</span>
             </div>
             <div className='flex justify-between font-bold'>
-              <span>Total Amount:</span>    <span>₹ 1500</span>
+              <span>Total Amount:</span><span>₹ {item ? ((item?.item?.price * 1.05) +
+                50) : (
+                  cartItems.reduce((total, item) => total + item.price * item.quantity, 0) * 1.05 +
+                  50
+                ).toFixed(2)}</span>
             </div>
           </div>
           <div className='flex items-start gap-2 p-4'>

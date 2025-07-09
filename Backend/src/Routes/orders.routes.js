@@ -3,11 +3,11 @@ const express = require('express');
 const verifyToken = require('../Middleware/auth.middleware.js');
 const router = express.Router();
 
-router.post('/order', verifyToken, createOrder);
-router.get('/getuserorders', verifyToken, getUserOrders);
+router.post('/placeorder', verifyToken, createOrder);
+router.get('/order', verifyToken, getUserOrders);
 router.get('/getallorders', verifyToken, getAllOrders);
-router.put('/update-order/:orderId', verifyToken, updateOrderStatus);
-router.delete('/cancel-order/:orderId', verifyToken, deleteOrder);
+router.put('/update-order/:id', verifyToken, updateOrderStatus);
+router.delete('/cancel-order/:id', deleteOrder);
 router.post('/place-order-razorpay', verifyToken, placeOrderRazorpay);
 router.post('/place-order-stripe', verifyToken, placeOrderStripe);
 

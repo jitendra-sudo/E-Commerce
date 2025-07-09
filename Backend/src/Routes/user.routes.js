@@ -1,4 +1,4 @@
-const {  RegisterUser,AddressList, AddressDelete,Address,LoginUser,  LogoutUser,  VerifyOTP,  ResendOTP , Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart } = require('../Controller/user.controller.js');
+const {  RegisterUser,AddressList,EditProfile, AddressDelete,Address,LoginUser,  LogoutUser,  VerifyOTP,  ResendOTP , Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart } = require('../Controller/user.controller.js');
 const express = require('express');
 const verifyToken = require('../Middleware/auth.middleware.js');
 const router = express.Router();
@@ -10,6 +10,7 @@ router.post('/logout', verifyToken, LogoutUser);
 router.post('/verify-otp', VerifyOTP);  
 router.post('/resend-otp', ResendOTP);
 router.get('/profile', verifyToken,  Profile);
+router.put('/profile-edit', verifyToken,EditProfile);
 router.post('/upload', upload.any(), uploadUrl);
 router.post('/admin', verifyToken, AdminProfile);
 router.post('/add-to-cart', verifyToken, AddtoCart);
