@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation,useNavigate  } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReviewModal from '../compound/review'
-import { useDispatch, useSelector  } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Avatar from '@mui/material/Avatar';
 import Rating from '@mui/material/Rating';
 import { addToCart } from '../ContextApi/Cart.slice';
@@ -34,7 +34,6 @@ function Product() {
     }
   };
 
-  console.log(item)
 
   useEffect(() => {
     if (item?.image?.length > 0) {
@@ -87,30 +86,34 @@ function Product() {
     }
 
     const uniqueItem = { ...item, selectedSize, _id: `${item._id}-${selectedSize}` };
-    navigate('/placeorder' , { state: { item: uniqueItem } });
+    navigate('/placeorder', { state: { item: uniqueItem } });
   };
 
   return (
     <div className='py-8 px-2 md:px-4 lg:px-0'>
       <div className=' block lg:flex gap-4 '>
         {/* left */}
-        <div className='flex flex-col-reverse md:flex-row h-full w-full md:w-full xl:w-[70%] md:gap-13 lg:gap-2 gap-3 px-0 md:px-12 lg:px-0 pb-8'>
-          <div className='flex flex-row  md:flex-col justify-between gap-1'>
+        <div className="flex mx-auto flex-col-reverse md:flex-row h-full w-full md:w-full xl:w-[70%] md:gap-13 lg:gap-2 gap-3 px-0 md:px-12 lg:px-0 pb-8">
+          {/* Thumbnail Images */}
+          <div className="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-y-auto scroll-smooth max-w-full md:max-h-[400px] pr-1">
             {item?.image?.map((img, index) => (
               <img
                 key={index}
                 src={img}
                 onClick={() => setReviewImg(img)}
-                alt='thumbnail'
-                className={`w-auto h-20 md:h-28 rounded-sm object-cover cursor-pointer ${img === reviewImg ? 'border border-gray-300' : ''}`}
+                alt="thumbnail"
+                className={`w-auto h-20 md:h-28 rounded-sm object-cover cursor-pointer ${img === reviewImg ? 'border border-gray-300' : ''
+                  }`}
               />
             ))}
           </div>
 
-          <div className='ml-0 md:ml-4'>
-            <img src={reviewImg} className='w-full h-full rounded-sm' />
+          {/* Main Preview Image */}
+          <div className="md:ml-4">
+            <img src={reviewImg} className="w-full h-full rounded-sm" alt="preview" />
           </div>
         </div>
+
 
         {/* Right section */}
         <div className='w-full'>
@@ -168,22 +171,26 @@ function Product() {
         </div>
       </div>
       <div className='py-4'>
-        <div className='flex  gap-2'>
+        <div className="flex gap-4">
           <button
             onClick={() => setSelect(true)}
-            className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-black hover:text-black transition'
+            className={`px-4 py-2 rounded border transition 
+              ${select ? 'bg-black text-white border-black' : 'border-gray-700 text-gray-700 hover:border-black hover:text-black'}`}
           >
             Description
           </button>
+
           <button
             onClick={() => setSelect(false)}
-            className='border-gray-700 border text-gray-700 px-4 py-2 rounded hover:border-black hover:text-black transition'
+            className={`px-4 py-2 rounded border transition 
+         ${!select ? 'bg-black text-white border-black' : 'border-gray-700 text-gray-700 hover:border-black hover:text-black'}`}
           >
             Reviews
           </button>
         </div>
 
-        <div className='py-2'>
+
+        <div className='py-2 min-h-50 max-h-80 overflow-y-scroll overflow-x-hidden'>
           {select ? (
             <div>
               <p className='text-gray-500 text-sm'>{item.description}</p>

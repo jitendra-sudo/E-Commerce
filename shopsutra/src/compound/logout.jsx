@@ -6,7 +6,6 @@ const Logout = (dispatch) => {
   localStorage.removeItem("token");
   delete Api.defaults.headers.common["Authorization"];
   dispatch(logout());
-  toast.success("Logged out successfully!");
 };
 
 export default Logout;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import logo from "../assets/logoshopSutra.png";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { FaShoppingBag, FaHome, FaInfoCircle, FaPhone, FaThList } from "react-icons/fa";
+import { FaShoppingBag, FaHome, FaInfoCircle, FaPhone, FaThList, FaHeart } from "react-icons/fa";
 import { BsList } from "react-icons/bs";
 import Avatar from '@mui/material/Avatar';
 import { FaSearch } from "react-icons/fa";
@@ -21,11 +21,12 @@ const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [showRegister, setShowRegister] = useState(false);
   const token = localStorage.getItem('token');
+  const profilePicture = localStorage.getItem('profilePicture');
   const dispatch = useDispatch();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-const { user } = useSelector((state) => state.auth);
-   console.log(user)
+  const { user, resData, } = useSelector((state) => state.auth);
+
   useEffect(() => {
     if (location.pathname === '/collection') {
       setStatus(true);
@@ -106,26 +107,44 @@ const { user } = useSelector((state) => state.auth);
           </NavLink>
 
           {/* Avatar Dropdown */}
-          <div ref={dropdownRef} onClick={() => { if (!token) { setShowRegister(true); } else { setDropdownOpen(true); } }} className="flex flex-col items-center text-gray-700 hover:text-gray-900 relative"    >
-            <Avatar src="" sx={{ height: 28, width: 28 }} alt="User" />
+          <div ref={dropdownRef} onClick={() => { if (!token) { setShowRegister(true); } else { setDropdownOpen(true); } }} className="flex flex-col items-center text-gray-700 hover:text-gray-900 relative cursor-pointer" >
+            <Avatar src={profilePicture || user?.profilePicture} sx={{ height: 32, width: 32 }} alt="User" />
             {token && dropdownOpen && (
-              <div className="dropdown-content absolute rounded-lg bg-white text-gray-700 shadow-lg border border-gray-300 top-8 right-0 p-4 z-50">
-                <ul className="space-y-2">
-                  <li>
-                    <NavLink to="/profile" className="hover:text-gray-900">Profile</NavLink>
+
+              <div className="absolute right-0 my-9 w-40 rounded-xl bg-white shadow-lg ring-1 ring-gray-200 z-50 p-4">
+                <ul className="text-gray-700 flex flex-col gap-2">
+
+                  <li className=" ">
+                    <NavLink to="/profile"
+                      className="block text-gray-900 hover:text-white transition duration-150 border hover:border-transparent rounded-md p-1 px-4 hover:bg-black/90 backdrop-blur-md"      >
+                      Profile
+                    </NavLink>
                   </li>
+                  <li className=" ">
+                    <NavLink to="/wishlist"
+                      className="block text-gray-900 hover:text-white transition duration-150 border hover:border-transparent rounded-md p-1 px-4 hover:bg-black/90 backdrop-blur-md"      >
+                      Wishlist
+                    </NavLink>
+                  </li>
+
+                  {resData?.role == 'admin' &&
+                    <li>
+                      <NavLink to="/dashboard"
+                        className="block text-gray-900 hover:text-white transition duration-150 border hover:border-transparent rounded-md p-1 px-4 hover:bg-black/90 backdrop-blur-md"   >
+                        Dashboard
+                      </NavLink>
+                    </li>
+                  }
                   <li>
-                    <NavLink to="/settings" className="hover:text-gray-900">Settings</NavLink>
+                    <NavLink to="/settings"
+                      className="block text-gray-900 hover:text-white transition duration-150 border hover:border-transparent rounded-md p-1 px-4 hover:bg-black/90 backdrop-blur-md"   >
+                      Settings
+                    </NavLink>
                   </li>
                   <li>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDropdownOpen(false);
-                        Logout(dispatch);
-                      }}
-                      className="hover:text-gray-900 w-full text-left"
-                    >
+                      onClick={(e) => { e.stopPropagation(); setDropdownOpen(false); Logout(dispatch); }}
+                      className="block w-full text-red-900 hover:text-white transition duration-150 border hover:border-transparent rounded-md p-1 px-4 hover:bg-red-900/90 backdrop-blur-md" >
                       Logout
                     </button>
                   </li>
@@ -156,6 +175,7 @@ const { user } = useSelector((state) => state.auth);
                 <IoClose size={24} />
               </button>
               <ul className="mt-15 space-y-2">
+
                 {navItems.map(({ path, label, icon }) => (
                   <li key={path} className="flex items-center gap-3 text-gray-700 border border-gray-600 hover:border-t-transparent px-3 py-[6px] rounded-lg transition-all duration-200 hover:bg-black/30 hover:text-white">
                     {icon}
@@ -164,6 +184,12 @@ const { user } = useSelector((state) => state.auth);
                     </NavLink>
                   </li>
                 ))}
+                <li className="flex items-center gap-3 text-gray-700 border border-gray-600 hover:border-t-transparent px-3 py-[6px] rounded-lg transition-all duration-200 hover:bg-black/30 hover:text-white">
+                  <FaHeart />
+                  <NavLink to='/wishlist' onClick={() => setSliderOpen(false)}>
+                    Wishlist
+                  </NavLink>
+                </li>
               </ul>
             </div>
           </>

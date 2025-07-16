@@ -7,14 +7,25 @@ import { useNavigate } from 'react-router-dom';
 
 function Login() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { loading } = useSelector((state) => state.auth);
-    const defaultFormData = { name: '', username: '', email: '', password: '', phone: '', role: 'user' };
+
+    const defaultFormData = {
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        phone: '',
+        role: 'user',
+    };
+
     const [formData, setFormData] = useState(defaultFormData);
     const [loginInput, setLoginInput] = useState({ username: '', password: '' });
     const [otp, setOtp] = useState('');
     const [showLogin, setShowLogin] = useState(true);
     const [showOTP, setShowOTP] = useState(false);
-    const navigate = useNavigate()
+
+    const inputStyles = "w-full border text-[13px] rounded-md border-gray-300 px-3 py-2 focus:outline-none focus:border-blue-500";
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,7 +40,10 @@ function Login() {
         }
 
         dispatch(registerUser(formData)).unwrap()
-            .then(() => setShowOTP(true))
+            .then(() => {
+                toast.success("OTP sent to your email.");
+                setShowOTP(true);
+            })
             .catch(() => toast.error("Registration failed"));
     };
 
@@ -46,7 +60,7 @@ function Login() {
                 if (token) {
                     localStorage.setItem('token', token);
                     toast.success("Login successful");
-                    navigate("/")
+                    navigate("/");
                 } else {
                     toast.error("No token received");
                 }
@@ -69,31 +83,22 @@ function Login() {
             setShowOTP(false);
             setShowLogin(true);
             setFormData(defaultFormData);
-            navigate("/")
+            navigate("/");
         } else {
             toast.error('Invalid OTP. Please try again.');
         }
-    };
-
-    const inputStyles = "w-full border text-[13px] rounded-md border-gray-300 px-3 py-2 focus:outline-none focus:border-blue-500";
+    }
 
     return (
-        <div className="min-h-110 flex flex-col justify-between items-center  p-4">
-            <div className='w-full  my-4'>
-             {!showLogin && !showOTP && (
-                <TitleHeader task1="Register" task2="Page" />
-             )}
-
-             {showLogin && !showOTP  && (
-                <TitleHeader task1="login" task2="Page" />
-             )}
-
-             {showOTP && (
-                <TitleHeader task1="Verify" task2="OTP" />
-             )}
-                     
+        <div className="min-h-110 flex flex-col justify-between items-center p-4">
+            <div className="w-full my-4">
+                {!showLogin && !showOTP && <TitleHeader task1="Register" task2="Page" />}
+                {showLogin && !showOTP && <TitleHeader task1="Login" task2="Page" />}
+                {showOTP && <TitleHeader task1="Verify" task2="OTP" />}
             </div>
+
             <div className="rounded-xl border border-gray-300 shadow-lg p-6 w-full max-w-sm">
+                {/* Register */}
                 {!showLogin && !showOTP && (
                     <>
                         <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
@@ -107,7 +112,8 @@ function Login() {
                                 {loading ? "Loading..." : "Register"}
                             </button>
                         </form>
-                        <p className="text-center mt-4 text-sm">Already have an account?{' '}
+                        <p className="text-center mt-4 text-sm">
+                            Already have an account?{' '}
                             <button className="text-blue-600 hover:underline" onClick={() => setShowLogin(true)}>
                                 Login
                             </button>
@@ -115,6 +121,7 @@ function Login() {
                     </>
                 )}
 
+                {/* Login */}
                 {showLogin && !showOTP && (
                     <>
                         <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
@@ -125,7 +132,8 @@ function Login() {
                                 {loading ? "Loading..." : "Login"}
                             </button>
                         </form>
-                        <p className="text-center mt-4 text-sm">Don’t have an account?{' '}
+                        <p className="text-center mt-4 text-sm">
+                            Don’t have an account?{' '}
                             <button className="text-blue-600 hover:underline" onClick={() => setShowLogin(false)}>
                                 Register
                             </button>
@@ -133,6 +141,7 @@ function Login() {
                     </>
                 )}
 
+                {/* OTP Verification */}
                 {showOTP && (
                     <>
                         <h2 className="text-xl font-semibold text-center mb-4">Verify OTP</h2>

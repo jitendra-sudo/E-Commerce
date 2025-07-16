@@ -9,10 +9,11 @@ const productSchema = mongoose.Schema({
     image: { type: Array, required: true },
     category: { type: String, required: true },
     subcategory: { type: String, required: true },
+    brand: { type: String, required: true },
     sizes: { type: Array, required: true },
     bestseller: { type: Boolean, default: false },
     newarrival: { type: Boolean, default: true },
-}, { timestamps: true } )
+}, { timestamps: true })
 
 
 module.exports = mongoose.model('Product', productSchema);

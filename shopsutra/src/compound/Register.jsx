@@ -9,13 +9,12 @@ function Register({ showModal, setShowModal }) {
     const { loading } = useSelector((state) => state.auth);
     const defaultFormData = { name: '', username: '', email: '', password: '', phone: '', role: 'user' };
     const [formData, setFormData] = useState(defaultFormData);
-    const [loginInput, setLoginInput] = useState({ username: '', password: '' });
+    const [loginInput, setLoginInput] = useState({ email: '', password: '' });
     const [otp, setOtp] = useState('');
     const [showLogin, setShowLogin] = useState(true);
     const token = localStorage.getItem('token')
     const [showOTP, setShowOTP] = useState(false)
     const navigate = useNavigate()
-
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,23 +27,21 @@ function Register({ showModal, setShowModal }) {
             return;
         }
         dispatch(registerUser(formData)).unwrap()
-        .then(() =>
-            setShowOTP(true)
-        )
+            .then(() =>
+                setShowOTP(true)
+            )
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (!loginInput.username || !loginInput.password) {
+        if ((!loginInput.email && !loginInput.username && !loginInput.phone) || !loginInput.password) {
             toast.error("Please fill all fields.");
             return;
         }
         dispatch(loginUser(loginInput)).unwrap()
             .then((res) => {
-                let accessToken = res?.accessToken;
-                console.log(accessToken);
-                if (accessToken) {
-                    localStorage.setItem('token', res?.accessToken);
+                let Token = res?.accessToken;
+                if (Token) {
                     setShowModal(false);
                 } else {
                     toast.error("No token received");
@@ -52,9 +49,8 @@ function Register({ showModal, setShowModal }) {
             })
             .catch((err) => {
                 toast.error("Login failed");
-            });
-
-    };
+            })
+    }
 
 
     const handleOtpVerify = async (e) => {
@@ -63,13 +59,9 @@ function Register({ showModal, setShowModal }) {
             toast.error('OTP is required');
             return;
         }
-        const result = await dispatch(verifyOtp({ otp, email: formData.email })).unwrap();
-        if (result.success) {
-            setShowModal(false);
-            setShowLogin(true);
-        } else {
-            toast.error('Invalid OTP. Please try again.');
-        }
+        await dispatch(verifyOtp({ otp, email: formData.email })).unwrap();
+        setShowModal(false);
+        setShowLogin(true);
     };
 
 
@@ -103,7 +95,7 @@ function Register({ showModal, setShowModal }) {
                             <>
                                 <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
                                 <form className="space-y-4" onSubmit={handleLogin}>
-                                    <input type="text" name="username" value={loginInput?.username} onChange={(e) => setLoginInput({ ...loginInput, username: e.target.value })} placeholder="Username or Email or Phone" className={inputStyles} />
+                                    <input type="text" name="email" value={loginInput?.email} onChange={(e) => setLoginInput({ ...loginInput, email: e.target.value })} placeholder="Username, Email, or Phone" className={inputStyles} />
                                     <input type="password" name="password" value={loginInput?.password} onChange={(e) => setLoginInput({ ...loginInput, password: e.target.value })} placeholder="Password" className={inputStyles} />
                                     <button type="submit" className="w-full bg-yellow-600 hover:bg-amber-500 text-white py-2 rounded"> {loading ? <span>Loading...</span> : "Login"}</button>
                                 </form>

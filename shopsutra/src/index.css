@@ -10,3 +10,19 @@ a.active hr {
 body::-webkit-scrollbar {
     display: none;
 }
+
+.input {
+  @apply w-full px-4 py-2 border rounded-md border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.btn-blue {
+  @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded;
+}
+
+.btn-green {
+  @apply px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded;
+}
+
+.btn-gray {
+  @apply px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded;
+}

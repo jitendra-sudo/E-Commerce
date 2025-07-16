@@ -12,7 +12,7 @@ router.post('/resend-otp', ResendOTP);
 router.get('/profile', verifyToken,  Profile);
 router.put('/profile-edit', verifyToken,EditProfile);
 router.post('/upload', upload.any(), uploadUrl);
-router.post('/admin', verifyToken, AdminProfile);
+router.post('/admin', AdminProfile);
 router.post('/add-to-cart', verifyToken, AddtoCart);
 router.post('/remove-from-cart', verifyToken, RemoveFromCart);
 router.post('/address', verifyToken, Address);

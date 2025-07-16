@@ -41,13 +41,16 @@ const LoginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        if (!user.isVerified) {
+            return res.status(403).json({ message: 'Email not verified. Please verify your email before logging in.' });
+        }
+
         const refreshToken = user.generateRefreshToken();
         const accessToken = user.generateAccessToken();
         user.refreshToken = refreshToken;
 
         await user.save();
-
-        res.status(200).json({ message: 'Login successful', accessToken });
+        res.status(200).json({ message: 'Login successful', accessToken, data: { name: user.name, profilePicture: user.profilePicture , role: user.role } });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -84,6 +87,12 @@ const VerifyOTP = async (req, res) => {
     }
 
     try {
+        const existingUser = await User.findOne({ $or: [{ email: storedUser.email }, { username: storedUser.username }, { phone: storedUser.phone }] });
+        if (existingUser) {
+            tempUserStore.delete(email);
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
         const newUser = new User({
             name: storedUser.name,
             username: storedUser.username,
@@ -103,16 +112,12 @@ const VerifyOTP = async (req, res) => {
 
         tempUserStore.delete(email);
 
-        res.status(201).json({
-            message: 'OTP verified, user registered successfully',
-            refreshToken,
-            accessToken,
-        });
-
+        res.status(201).json({ message: 'OTP verified, user registered successfully', accessToken, data: { name: storedUser.name, profilePicture: storedUser.profilePicture , role: storedUser.role } });
     } catch (error) {
         console.error('Verify OTP Error:', error);
         res.status(500).json({ message: 'Failed to register user' });
     }
+
 };
 
 const Profile = async (req, res) => {
@@ -167,7 +172,7 @@ const AdminProfile = async (req, res) => {
         user.role = 'admin';
         await user.save();
 
-        res.status(200).json(user);
+        res.status(200).json({ message:'admin login successfully'   ,user , role: user.role});
     } catch (error) {
         console.error('Error fetching admin profile:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -320,34 +325,34 @@ const AddressDelete = async (req, res) => {
 };
 
 const EditProfile = async (req, res) => {
-  try {
-    const userId = req.userId; 
-    const updateData = req.body;
+    try {
+        const userId = req.userId;
+        const updateData = req.body;
 
-    delete updateData.password;
-    delete updateData.role;
-    delete updateData.refreshToken;
-    delete updateData.email; 
+        delete updateData.password;
+        delete updateData.role;
+        delete updateData.refreshToken;
+        delete updateData.email;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).select('-password -refreshToken');
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).select('-password -refreshToken');
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({
+            message: 'Profile updated successfully',
+            user: updatedUser,
+        });
+    } catch (error) {
+        console.error('EditProfile error:', error);
+        return res.status(500).json({ message: 'Something went wrong', error: error.message });
     }
-
-    return res.status(200).json({
-      message: 'Profile updated successfully',
-      user: updatedUser,
-    });
-  } catch (error) {
-    console.error('EditProfile error:', error);
-    return res.status(500).json({ message: 'Something went wrong', error: error.message });
-  }
 };
 
 
-module.exports = { RegisterUser,EditProfile, AddressList, AddressDelete, Address, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };
+module.exports = { RegisterUser, EditProfile, AddressList, AddressDelete, Address, LoginUser, LogoutUser, VerifyOTP, ResendOTP, Profile, uploadUrl, AdminProfile, AddtoCart, RemoveFromCart };
