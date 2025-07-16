@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 const Api = axios.create({
-  // baseURL: "https://e-commerce-z64r.onrender.com/api",
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://e-commerce-z64r.onrender.com/api",
+  // baseURL: "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json",
   },
