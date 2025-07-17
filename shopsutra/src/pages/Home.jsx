@@ -5,6 +5,7 @@ import Mapping from '../compound/Mapping';
 import OurFeatures from '../compound/OurFeatures';
 import LetterBox from '../compound/letterBox';
 import Api from '../compound/Api';
+import { Mosaic } from 'react-loading-indicators'; // ✅ Import Mosaic
 
 function Home() {
   const [productData, setProductData] = useState([]);
@@ -27,11 +28,23 @@ function Home() {
     fetchData();
   }, [fetchData]);
 
-  const latestCollection = productData?.filter((d) => d?.bestseller === true || d?.bestseller === 'true');
-  const bestSeller = productData?.filter((d) => d?.newarrival === true || d?.newarrival === 'true');
+  const latestCollection = productData?.filter(
+    (d) => d?.bestseller === true || d?.bestseller === 'true'
+  );
+  const bestSeller = productData?.filter(
+    (d) => d?.newarrival === true || d?.newarrival === 'true'
+  );
 
   if (loading) {
-    return <div className="py-10 text-center text-gray-600">Loading...</div>;
+    return (
+      <div className="flex  h-[85vh] justify-center items-center py-20">
+        <Mosaic
+          size="medium"
+          color="#000000" 
+          text=""       
+        />
+      </div>
+    );
   }
 
   if (error) {
@@ -61,6 +74,7 @@ function Home() {
         </div>
         <Mapping data={bestSeller} />
       </div>
+
       <OurFeatures />
       <LetterBox />
     </div>

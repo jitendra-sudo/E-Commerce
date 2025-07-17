@@ -50,7 +50,7 @@ const LoginUser = async (req, res) => {
         user.refreshToken = refreshToken;
 
         await user.save();
-        res.status(200).json({ message: 'Login successful', accessToken, data: { name: user.name, profilePicture: user.profilePicture , role: user.role } });
+        res.status(200).json({ message: 'Login successful', accessToken, data: { name: user.name, profilePicture: user.profilePicture, role: user.role } });
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -112,7 +112,15 @@ const VerifyOTP = async (req, res) => {
 
         tempUserStore.delete(email);
 
-        res.status(201).json({ message: 'OTP verified, user registered successfully', accessToken, data: { name: storedUser.name, profilePicture: storedUser.profilePicture , role: storedUser.role } });
+        res.status(201).json({
+            message: 'OTP verified, user registered successfully',
+            accessToken,
+            data: {
+                name: storedUser.name,
+                profilePicture: storedUser.profilePicture || "https://images.news9live.com/wp-content/uploads/2023/08/cropped-image-2082.png?w=900&enlarge=true",
+                role: storedUser.role
+            }
+        });
     } catch (error) {
         console.error('Verify OTP Error:', error);
         res.status(500).json({ message: 'Failed to register user' });
@@ -172,7 +180,7 @@ const AdminProfile = async (req, res) => {
         user.role = 'admin';
         await user.save();
 
-        res.status(200).json({ message:'admin login successfully'   ,user , role: user.role});
+        res.status(200).json({ message: 'admin login successfully', user, role: user.role });
     } catch (error) {
         console.error('Error fetching admin profile:', error);
         res.status(500).json({ message: 'Internal server error' });

@@ -56,12 +56,9 @@ export const fetchProfile = createAsyncThunk('auth/fetchProfile', async (_, { re
 export const verifyOtp = createAsyncThunk('auth/verifyOtp', async ({ otp, email }, { rejectWithValue }) => {
   try {
     const res = await Api.post('/verify-otp', { otp, email });
-    if (res.data.success) {
-      toast.success("OTP verified successfully!");
-      localStorage.setItem('token', res?.data?.accessToken);
-    } else {
-      toast.error("Invalid OTP");
-    }
+    toast.success("OTP verified successfully!");
+    localStorage.setItem('token', res?.data?.accessToken);
+    localStorage.setItem('profilePicture', res?.data?.profilePicture);
     return res.data;
   } catch (err) {
     const message = err.response?.data?.message || err.message;
